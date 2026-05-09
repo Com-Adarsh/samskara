@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import Head from 'next/head';
 import { motion, AnimatePresence } from 'framer-motion';
 import { fetchArtisticSubmissions } from '../utils/GoogleSheetLib';
-import Footer from '../components/Footer';
+import Footer from '../components/Footer'; // Your new premium footer
 
 // Core Components
 import IntroSplash from '../components/IntroSplash';
@@ -11,12 +11,11 @@ import ProcessSlider from '../components/ProcessSlider';
 import InstagramFeed from '../components/InstagramFeed';
 import FilterBar from '../components/FilterBar';
 
-// The missing pieces
+// Form & Story
 import DetailsForm from '../components/DetailsForm';
 import StoryEntry from '../components/StoryEntry';
 
 export default function Home() {
-  // Logic Flow: 'splash' -> 'details' -> 'story' -> 'gallery'
   const [step, setStep] = useState('splash');
   const [activeTab, setActiveTab] = useState('All');
   const [submissions, setSubmissions] = useState([]);
@@ -47,6 +46,7 @@ export default function Home() {
       <Head>
         <title>SAMSKARA | CUSAT Artistic Collective</title>
         <link href="https://fonts.googleapis.com/css2?family=Syncopate:wght@700&family=Inter:wght@300;600&display=swap" rel="stylesheet" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
       </Head>
 
       <AnimatePresence mode="wait">
@@ -94,10 +94,8 @@ export default function Home() {
 
             <InstagramFeed />
 
-            <footer style={styles.footer}>
-              <div style={styles.divider}></div>
-              <p style={{ letterSpacing: '1px' }}>© 2026 Samskara CUSAT | Artistic Collective Portal</p>
-            </footer>
+            {/* THE NEW PREMIUM FOOTER PLACED HERE */}
+            <Footer />
           </motion.div>
         )}
       </AnimatePresence>
@@ -118,27 +116,5 @@ const styles = {
     textTransform: 'uppercase',
     letterSpacing: '4px',
     marginBottom: '30px'
-  },
-  footer: {
-    fontFamily: "'Inter', sans-serif",
-    padding: '60px 20px',
-    textAlign: 'center',
-    color: '#555',
-    fontSize: '0.8rem',
-    textTransform: 'uppercase'
-  },
-  divider: {
-    height: '1px',
-    backgroundColor: '#333',
-    width: '40%',
-    margin: '0 auto 20px auto'
   }
 };
-
-return (
-  <div className="main-container">
-    {/* ... your existing splash/form/gallery code ... */}
-    
-    <Footer /> 
-  </div>
-);
