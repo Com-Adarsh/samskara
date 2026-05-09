@@ -1,25 +1,36 @@
-// pages/index.js
 import { useState, useEffect } from 'react';
-import Head from 'next/head'; // Added for custom fonts and title
+import Head from 'next/head';
 import { motion, AnimatePresence } from 'framer-motion';
 import { fetchArtisticSubmissions } from '../utils/GoogleSheetLib';
+
+// Core Components
 import IntroSplash from '../components/IntroSplash';
 import PhotoGallery from '../components/PhotoGallery';
 import ProcessSlider from '../components/ProcessSlider';
 import InstagramFeed from '../components/InstagramFeed';
 import FilterBar from '../components/FilterBar';
 
+// The missing pieces
+import DetailsForm from '../components/DetailsForm';
+import StoryEntry from '../components/StoryEntry';
+
 export default function Home() {
-  const [introFinished, setIntroFinished] = useState(false);
+  // Logic Flow: 'splash' -> 'details' -> 'story' -> 'gallery'
+  const [step, setStep] = useState('splash');
   const [activeTab, setActiveTab] = useState('All');
   const [submissions, setSubmissions] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     async function loadData() {
-      const data = await fetchArtisticSubmissions();
-      setSubmissions(data);
-      setLoading(false);
+      try {
+        const data = await fetchArtisticSubmissions();
+        setSubmissions(data || []);
+      } catch (error) {
+        console.error("Error loading Samskara data:", error);
+      } finally {
+        setLoading(false);
+      }
     }
     loadData();
   }, []);
@@ -34,44 +45,61 @@ export default function Home() {
     <div style={{ backgroundColor: '#000', color: '#fff', minHeight: '100vh' }}>
       <Head>
         <title>SAMSKARA | CUSAT Artistic Collective</title>
-        {/* Importing Syncopate for headings and Inter for body text */}
         <link href="https://fonts.googleapis.com/css2?family=Syncopate:wght@700&family=Inter:wght@300;600&display=swap" rel="stylesheet" />
       </Head>
 
-      {!introFinished ? (
-        <IntroSplash onComplete={() => setIntroFinished(true)} />
-      ) : (
-        <motion.div 
-          initial={{ opacity: 0 }} 
-          animate={{ opacity: 1 }} 
-          transition={{ duration: 1 }}
-          style={{ fontFamily: "'Inter', sans-serif" }} // Set default body font
-        >
-          <FilterBar activeTab={activeTab} setActiveTab={setActiveTab} />
+      <AnimatePresence mode="wait">
+        {/* PHASE 1: THE INTRO VIDEO */}
+        {step === 'splash' && (
+          <IntroSplash key="splash" onComplete={() => setStep('details')} />
+        )}
 
-          {(activeTab === 'All' || activeTab === 'Painting') && featuredPainting && (
+        {/* PHASE 2: COLLECTING USER DETAILS */}
+        {step === 'details' && (
+          <DetailsForm key="details" onNext={() => setStep('story')} />
+        )}
+
+        {/* PHASE 3: THE STORY WRITING PORTAL */}
+        {step === 'story' && (
+          <StoryEntry key="story" onFinish={() => setStep('gallery')} />
+        )}
+
+        {/* PHASE 4: THE MAIN GALLERY HUB */}
+        {step === 'gallery' && (
+          <motion.div 
+            key="gallery"
+            initial={{ opacity: 0 }} 
+            animate={{ opacity: 1 }} 
+            exit={{ opacity: 0 }}
+            transition={{ duration: 1 }}
+            style={{ fontFamily: "'Inter', sans-serif" }}
+          >
+            <FilterBar activeTab={activeTab} setActiveTab={setActiveTab} />
+
+            {(activeTab === 'All' || activeTab === 'Painting') && featuredPainting && (
+              <section style={styles.section}>
+                <h2 style={styles.sectionTitle}>Featured Process</h2>
+                <ProcessSlider 
+                  sketch={featuredPainting.sketchUrl} 
+                  final={featuredPainting.url} 
+                  artistName={featuredPainting.artist} 
+                />
+              </section>
+            )}
+
             <section style={styles.section}>
-              <h2 style={styles.sectionTitle}>Featured Process</h2>
-              <ProcessSlider 
-                sketch={featuredPainting.sketchUrl} 
-                final={featuredPainting.url} 
-                artistName={featuredPainting.artist} 
-              />
+              <PhotoGallery photos={filteredData} />
             </section>
-          )}
 
-          <section style={styles.section}>
-            <PhotoGallery photos={filteredData} />
-          </section>
+            <InstagramFeed />
 
-          <InstagramFeed />
-
-          <footer style={styles.footer}>
-            <div style={styles.divider}></div>
-            <p style={{ letterSpacing: '1px' }}>© 2026 Samskara CUSAT | Artistic Collective Portal</p>
-          </footer>
-        </motion.div>
-      )}
+            <footer style={styles.footer}>
+              <div style={styles.divider}></div>
+              <p style={{ letterSpacing: '1px' }}>© 2026 Samskara CUSAT | Artistic Collective Portal</p>
+            </footer>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
@@ -81,10 +109,10 @@ const styles = {
     padding: '40px 0',
   },
   sectionTitle: {
-    fontFamily: "'Syncopate', sans-serif", // Applied artistic font
+    fontFamily: "'Syncopate', sans-serif",
     textAlign: 'center',
-    color: 'transparent', // Make text transparent for the outline effect
-    WebkitTextStroke: '1px #FFD700', // Yellow outline
+    color: 'transparent',
+    WebkitTextStroke: '1px #FFD700',
     fontSize: '2.5rem',
     textTransform: 'uppercase',
     letterSpacing: '4px',
