@@ -2,28 +2,19 @@ import { useState, useEffect } from 'react';
 import Head from 'next/head';
 import { motion, AnimatePresence } from 'framer-motion';
 import { fetchArtisticSubmissions } from '../utils/GoogleSheetLib';
-import Footer from '../components/Footer';
 
-// Core Components
+// Components
 import IntroSplash from '../components/IntroSplash';
-import PhotoGallery from '../components/PhotoGallery';
-import ProcessSlider from '../components/ProcessSlider';
-import InstagramFeed from '../components/InstagramFeed';
-import FilterBar from '../components/FilterBar';
-
-// Form Components
 import DetailsForm from '../components/DetailsForm';
+import CreativeWall from '../components/CreativeWall'; 
+import Footer from '../components/Footer';
 
 export default function Home() {
   const [step, setStep] = useState('splash');
-  const [activeTab, setActiveTab] = useState('All');
   const [submissions, setSubmissions] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [uploading, setUploading] = useState(false);
 
-  const scriptURL = 'https://script.google.com/macros/s/AKfycbxzj7vxNbt3Kn6ET1Q_ik_8dS7skjBI_I2iK03W_nvO5_VGxhQDVdEa-tm6G4OSxy2D/exec'; 
-  const imgbbAPIKey = '6150992b01e2acc330921c2be02bf83a'; 
-
+  // ഗാലറിയിലേക്ക് വേണ്ട ഡാറ്റ ലോഡ് ചെയ്യുന്നു
   const loadData = async () => {
     try {
       const data = await fetchArtisticSubmissions();
@@ -39,50 +30,6 @@ export default function Home() {
     loadData();
   }, []);
 
-  const filteredData = submissions.filter(item => 
-    activeTab === 'All' ? true : item.type === activeTab
-  );
-
-  const featuredPainting = submissions.find(item => item.type === 'Painting');
-
-  const handleUpload = async (e) => {
-    e.preventDefault();
-    setUploading(true);
-    const form = e.target;
-    const fileInput = form.imageFile.files[0];
-    let imageUrl = "";
-
-    try {
-      if (fileInput) {
-        const imgData = new FormData();
-        imgData.append('image', fileInput);
-        const imgRes = await fetch(`https://api.imgbb.com/1/upload?key=${imgbbAPIKey}`, {
-          method: 'POST',
-          body: imgData
-        });
-        const imgJson = await imgRes.json();
-        imageUrl = imgJson.data.url;
-      }
-
-      const formData = new FormData();
-      formData.set('formType', 'creative');
-      formData.set('Name', localStorage.getItem('userName') || "Guest");
-      formData.set('Dept', localStorage.getItem('userDept') || "CUSAT");
-      formData.set('Title', form.title.value);
-      formData.set('Content', form.content.value);
-      formData.set('imageUrl', imageUrl);
-
-      await fetch(scriptURL, { method: 'POST', body: formData });
-      alert("സൃഷ്ടി വിജയകരമായി പങ്കുവെച്ചു!");
-      form.reset();
-      loadData();
-    } catch (err) {
-      alert("Error: " + err.message);
-    } finally {
-      setUploading(false);
-    }
-  };
-
   return (
     <div style={{ backgroundColor: '#000', color: '#fff', minHeight: '100vh', overflowX: 'hidden' }}>
       <Head>
@@ -92,20 +39,18 @@ export default function Home() {
       </Head>
 
       <AnimatePresence mode="wait">
+        {/* 1. ആനിമേഷൻ സ്പ്ലാഷ് സ്ക്രീൻ */}
         {step === 'splash' && (
           <IntroSplash 
             key="splash" 
             onComplete={() => {
               const isRegistered = localStorage.getItem('isRegistered');
-              if (isRegistered === 'true') {
-                setStep('gallery');
-              } else {
-                setStep('details');
-              }
+              setStep(isRegistered === 'true' ? 'gallery' : 'details');
             }} 
           />
         )}
 
+        {/* 2. രജിസ്ട്രേഷൻ ഫോം (രജിസ്റ്റർ ചെയ്യാത്തവർക്ക് മാത്രം) */}
         {step === 'details' && (
           <DetailsForm 
             key="details" 
@@ -116,6 +61,7 @@ export default function Home() {
           />
         )}
 
+        {/* 3. പ്രധാന ഗാലറി കംപോണന്റ് (CreativeWall) */}
         {step === 'gallery' && (
           <motion.div 
             key="gallery"
@@ -124,139 +70,20 @@ export default function Home() {
             transition={{ duration: 1 }}
             style={{ fontFamily: "'Inter', sans-serif" }}
           >
-            {/* Filter Bar - No border version */}
-            <FilterBar activeTab={activeTab} setActiveTab={setActiveTab} />
-
-            {/* Featured Section */}
-            {(activeTab === 'All' || activeTab === 'Painting') && featuredPainting && (
-              <section style={styles.section}>
-                <h2 style={styles.sectionTitle}>Featured Process</h2>
-                <ProcessSlider 
-                  sketch={featuredPainting.sketchUrl} 
-                  final={featuredPainting.url} 
-                  artistName={featuredPainting.artist} 
-                />
-              </section>
-            )}
-
-            {/* Main Gallery */}
-            <section style={styles.section}>
-              <PhotoGallery photos={filteredData} />
-            </section>
-
-            {/* Upload Portal - Border Removed, Subtle Shadow Added */}
-            <section style={styles.uploadSection}>
-              <h2 style={styles.subTitle}>സൃഷ്ടികൾ പങ്കുവെക്കൂ</h2>
-              <form onSubmit={handleUpload} style={styles.form}>
-                <input type="text" name="title" placeholder="Title" required style={styles.input} />
-                <textarea name="content" placeholder="എഴുത്തുകൾ ഉണ്ടെങ്കിൽ..." style={styles.input} rows="3" />
-                <div style={styles.fileContainer}>
-                  <label style={{color: '#888'}}>ചിത്രങ്ങൾ ചേർക്കാം (Optional): </label>
-                  <input type="file" name="imageFile" accept="image/*" style={styles.fileInput} />
-                </div>
-                <button type="submit" disabled={uploading} style={styles.submitBtn}>
-                  {uploading ? "UPLOADING..." : "SUBMIT TO GALLERY"}
-                </button>
-              </form>
-            </section>
-
-            <InstagramFeed />
+            {/* 
+              ഗാലറി, ഫിൽട്ടർ, അപ്‌ലോഡ് ഫോം എന്നിവയെല്ലാം CreativeWall-ലേക്ക് മാറ്റി.
+              ഇവിടെ refreshData പ്രോപ്പ് നൽകുന്നത് അപ്‌ലോഡ് കഴിഞ്ഞാലുടൻ ലിസ്റ്റ് പുതുക്കാൻ സഹായിക്കും.
+            */}
+            <CreativeWall 
+              submissions={submissions} 
+              refreshData={loadData} 
+              loading={loading}
+            />
+            
             <Footer />
           </motion.div>
         )}
       </AnimatePresence>
     </div>
-  );
-}
-
-const styles = {
-  section: { padding: '40px 0' },
-  sectionTitle: {
-    fontFamily: "'Syncopate', sans-serif",
-    textAlign: 'center',
-    color: 'transparent',
-    WebkitTextStroke: '1px #FFD700',
-    fontSize: '1.8rem',
-    textTransform: 'uppercase',
-    letterSpacing: '4px',
-    marginBottom: '30px'
-  },
-  uploadSection: {
-    maxWidth: '650px',
-    margin: '60px auto',
-    padding: '40px 20px',
-    background: '#0a0a0a', // നേരിയ വ്യത്യാസമുള്ള ബ്ലാക്ക്
-    borderRadius: '40px',
-    textAlign: 'center',
-    // ബോർഡർ ഒഴിവാക്കി നിഴൽ നൽകി
-    boxShadow: '0 20px 40px rgba(0,0,0,0.5)'
-  },
-  subTitle: { color: '#FFD700', marginBottom: '25px', fontFamily: "'Syncopate', sans-serif", fontSize: '1.1rem', letterSpacing: '2px' },
-  form: { display: 'flex', flexDirection: 'column', gap: '15px' },
-  input: {
-    width: '100%', 
-    padding: '16px', 
-    background: '#151515', 
-    border: 'none', // ബോർഡർ പൂർണ്ണമായും ഒഴിവാക്കി
-    color: '#fff', 
-    borderRadius: '15px', 
-    outline: 'none',
-    fontSize: '15px'
-  },
-  fileContainer: { fontSize: '13px', textAlign: 'left', padding: '10px 5px' },
-  fileInput: { marginLeft: '10px', color: '#fbbf24', fontSize: '12px' },
-  submitBtn: {
-    padding: '18px', 
-    background: 'linear-gradient(to right, #ef4444, #b91c1c)', // ഗ്രേഡിയന്റ് ലുക്ക്
-    color: '#fff', 
-    border: 'none', 
-    borderRadius: '15px', 
-    cursor: 'pointer', 
-    fontWeight: 'bold', 
-    letterSpacing: '2px',
-    marginTop: '10px',
-    boxShadow: '0 10px 20px rgba(239, 68, 68, 0.2)'
-  }
-};
-// നിങ്ങളുടെ കോഡിലെ ഈ ഭാഗം ഇങ്ങനെ മാറ്റുക
-instaBtn: { 
-  color: '#888', // അല്പം കൂടി തെളിഞ്ഞ നിറം
-  textDecoration: 'none', 
-  fontSize: '0.7rem', 
-  letterSpacing: '2px', 
-  border: '1px solid rgba(255,255,255,0.1)', // ബോർഡർ വളരെ നേർത്തതാക്കി
-  padding: '10px 20px', 
-  borderRadius: '30px',
-  transition: '0.3s'
-}
-
-import { useState, useEffect } from 'react';
-import DetailsForm from '../components/DetailsForm';
-import CreativeWall from '../components/CreativeWall'; // നിങ്ങളുടെ പുതിയ ഫയൽ
-
-export default function Home() {
-  const [step, setStep] = useState('loading');
-
-  useEffect(() => {
-    // രജിസ്റ്റർ ചെയ്തിട്ടുണ്ടോ എന്ന് പരിശോധിക്കുന്നു
-    const registered = localStorage.getItem('isRegistered');
-    setStep(registered === 'true' ? 'wall' : 'details');
-  }, []);
-
-  if (step === 'loading') return null;
-
-  return (
-    <main style={{ backgroundColor: '#050505', minHeight: '100vh' }}>
-      {/* രജിസ്റ്റർ ചെയ്യാത്തവർക്ക് മാത്രം ഇത് കാണിക്കും */}
-      {step === 'details' && (
-        <DetailsForm onNext={() => {
-          localStorage.setItem('isRegistered', 'true');
-          setStep('wall');
-        }} />
-      )}
-      
-      {/* രജിസ്റ്റർ ചെയ്തവർക്ക് മാത്രം ഗാലറിയും അപ്‌ലോഡും കാണിക്കും */}
-      {step === 'wall' && <CreativeWall />}
-    </main>
   );
 }
