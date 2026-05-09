@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import Head from 'next/head';
 import { motion, AnimatePresence } from 'framer-motion';
 import { fetchArtisticSubmissions } from '../utils/GoogleSheetLib';
-import Footer from '../components/Footer'; // Your new premium footer
+import Footer from '../components/Footer';
 
 // Core Components
 import IntroSplash from '../components/IntroSplash';
@@ -11,27 +11,32 @@ import ProcessSlider from '../components/ProcessSlider';
 import InstagramFeed from '../components/InstagramFeed';
 import FilterBar from '../components/FilterBar';
 
-// Form & Story
+// Form Components
 import DetailsForm from '../components/DetailsForm';
-import StoryEntry from '../components/StoryEntry';
 
 export default function Home() {
   const [step, setStep] = useState('splash');
   const [activeTab, setActiveTab] = useState('All');
   const [submissions, setSubmissions] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [uploading, setUploading] = useState(false);
+
+  // Settings
+  const scriptURL = 'https://script.google.com/macros/s/AKfycbxzj7vxNbt3Kn6ET1Q_ik_8dS7skjBI_I2iK03W_nvO5_VGxhQDVdEa-tm6G4OSxy2D/exec'; 
+  const imgbbAPIKey = '6150992b01e2acc330921c2be02bf83a'; 
+
+  const loadData = async () => {
+    try {
+      const data = await fetchArtisticSubmissions();
+      setSubmissions(data || []);
+    } catch (error) {
+      console.error("Error loading Samskara data:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    async function loadData() {
-      try {
-        const data = await fetchArtisticSubmissions();
-        setSubmissions(data || []);
-      } catch (error) {
-        console.error("Error loading Samskara data:", error);
-      } finally {
-        setLoading(false);
-      }
-    }
     loadData();
   }, []);
 
@@ -40,6 +45,46 @@ export default function Home() {
   );
 
   const featuredPainting = submissions.find(item => item.type === 'Painting');
+
+  const handleUpload = async (e) => {
+    e.preventDefault();
+    setUploading(true);
+    const form = e.target;
+    const fileInput = form.imageFile.files[0];
+    let imageUrl = "";
+
+    try {
+      // 1. Upload to ImgBB
+      if (fileInput) {
+        const imgData = new FormData();
+        imgData.append('image', fileInput);
+        const imgRes = await fetch(`https://api.imgbb.com/1/upload?key=${imgbbAPIKey}`, {
+          method: 'POST',
+          body: imgData
+        });
+        const imgJson = await imgRes.json();
+        imageUrl = imgJson.data.url;
+      }
+
+      // 2. Submit to Google Sheets
+      const formData = new FormData();
+      formData.set('formType', 'creative');
+      formData.set('Name', localStorage.getItem('userName') || "Guest");
+      formData.set('Dept', localStorage.getItem('userDept') || "CUSAT");
+      formData.set('Title', form.title.value);
+      formData.set('Content', form.content.value);
+      formData.set('imageUrl', imageUrl);
+
+      await fetch(scriptURL, { method: 'POST', body: formData });
+      alert("സൃഷ്ടി ഗാലറിയിൽ ചേർത്തു!");
+      form.reset();
+      loadData();
+    } catch (err) {
+      alert("Error uploading: " + err.message);
+    } finally {
+      setUploading(false);
+    }
+  };
 
   return (
     <div style={{ backgroundColor: '#000', color: '#fff', minHeight: '100vh' }}>
@@ -50,33 +95,28 @@ export default function Home() {
       </Head>
 
       <AnimatePresence mode="wait">
-        {/* PHASE 1: THE INTRO VIDEO */}
+        {/* PHASE 1: SPLASH */}
         {step === 'splash' && (
           <IntroSplash key="splash" onComplete={() => setStep('details')} />
         )}
 
-        {/* PHASE 2: COLLECTING USER DETAILS */}
+        {/* PHASE 2: DETAILS */}
         {step === 'details' && (
-          <DetailsForm key="details" onNext={() => setStep('story')} />
+          <DetailsForm key="details" onNext={() => setStep('gallery')} />
         )}
 
-        {/* PHASE 3: THE STORY WRITING PORTAL */}
-        {step === 'story' && (
-          <StoryEntry key="story" onFinish={() => setStep('gallery')} />
-        )}
-
-        {/* PHASE 4: THE MAIN GALLERY HUB */}
+        {/* PHASE 3: GALLERY HUB */}
         {step === 'gallery' && (
           <motion.div 
             key="gallery"
             initial={{ opacity: 0 }} 
             animate={{ opacity: 1 }} 
-            exit={{ opacity: 0 }}
             transition={{ duration: 1 }}
             style={{ fontFamily: "'Inter', sans-serif" }}
           >
             <FilterBar activeTab={activeTab} setActiveTab={setActiveTab} />
 
+            {/* Featured Section */}
             {(activeTab === 'All' || activeTab === 'Painting') && featuredPainting && (
               <section style={styles.section}>
                 <h2 style={styles.sectionTitle}>Featured Process</h2>
@@ -88,13 +128,28 @@ export default function Home() {
               </section>
             )}
 
+            {/* Main Gallery */}
             <section style={styles.section}>
               <PhotoGallery photos={filteredData} />
             </section>
 
-            <InstagramFeed />
+            {/* NEW: Upload Portal directly in Gallery */}
+            <section style={styles.uploadSection}>
+              <h2 style={styles.subTitle}>സൃഷ്ടികൾ പങ്കുവെക്കൂ</h2>
+              <form onSubmit={handleUpload} style={styles.form}>
+                <input type="text" name="title" placeholder="Title" required style={styles.input} />
+                <textarea name="content" placeholder="എഴുത്തുകൾ ഉണ്ടെങ്കിൽ..." style={styles.input} rows="3" />
+                <div style={styles.fileContainer}>
+                  <label>Add Image (Photography/Art): </label>
+                  <input type="file" name="imageFile" accept="image/*" style={{marginLeft: '10px'}} />
+                </div>
+                <button type="submit" disabled={uploading} style={styles.submitBtn}>
+                  {uploading ? "UPLOADING..." : "SUBMIT TO GALLERY"}
+                </button>
+              </form>
+            </section>
 
-            {/* THE NEW PREMIUM FOOTER PLACED HERE */}
+            <InstagramFeed />
             <Footer />
           </motion.div>
         )}
@@ -104,17 +159,35 @@ export default function Home() {
 }
 
 const styles = {
-  section: {
-    padding: '40px 0',
-  },
+  section: { padding: '40px 0' },
   sectionTitle: {
     fontFamily: "'Syncopate', sans-serif",
     textAlign: 'center',
     color: 'transparent',
     WebkitTextStroke: '1px #FFD700',
-    fontSize: '2.5rem',
+    fontSize: '2rem',
     textTransform: 'uppercase',
     letterSpacing: '4px',
     marginBottom: '30px'
+  },
+  uploadSection: {
+    maxWidth: '700px',
+    margin: '60px auto',
+    padding: '30px',
+    background: 'rgba(255,255,255,0.03)',
+    borderRadius: '30px',
+    border: '1px solid rgba(255,215,0,0.2)',
+    textAlign: 'center'
+  },
+  subTitle: { color: '#FFD700', marginBottom: '20px', fontFamily: "'Syncopate', sans-serif", fontSize: '1.2rem' },
+  form: { display: 'flex', flexDirection: 'column', gap: '15px' },
+  input: {
+    width: '100%', padding: '15px', background: '#111', border: '1px solid #333', 
+    color: '#fff', borderRadius: '10px', outline: 'none'
+  },
+  fileContainer: { fontSize: '14px', color: '#888', textAlign: 'left', padding: '10px' },
+  submitBtn: {
+    padding: '18px', background: '#ef4444', color: '#fff', border: 'none', 
+    borderRadius: '10px', cursor: 'pointer', fontWeight: 'bold', letterSpacing: '2px'
   }
 };
