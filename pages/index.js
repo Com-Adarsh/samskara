@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import Head from 'next/head';
 import { motion, AnimatePresence } from 'framer-motion';
 import { fetchArtisticSubmissions } from '../utils/GoogleSheetLib';
+import Footer from '../components/Footer';
 
 // Core Components
 import IntroSplash from '../components/IntroSplash';
