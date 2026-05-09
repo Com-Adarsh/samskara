@@ -154,7 +154,49 @@ export default function DetailsForm({ onNext }) {
     </motion.div>
   );
 }
+// ... മറ്റ് കോഡുകൾ ഒന്നുതന്നെ ...
 
+<form onSubmit={handleSubmit}>
+    <input type="hidden" name="formType" value="registration" />
+
+    <div style={styles.formGroup}>
+        <label style={styles.label}>Full Name</label>
+        <input type="text" name="name" placeholder="Enter your name" required style={styles.input} />
+    </div>
+
+    <div style={styles.formGroup}>
+        <label style={styles.label}>WhatsApp Number</label>
+        <input type="tel" name="phone" placeholder="10 Digit Number" pattern="[0-9]{10}" required style={styles.input} />
+    </div>
+
+    <div style={styles.formGroup}>
+        <label style={styles.label}>Department</label>
+        <input list="depts" name="dept" placeholder="Select Department..." required style={styles.input} />
+        {/* ... datalist ഇവിടെ വരും ... */}
+    </div>
+
+    <div style={styles.flexGroup}>
+        <div style={{...styles.formGroup, flex: 1}}>
+            <label style={styles.label}>Current Year</label>
+            <select name="year" required style={styles.select}>
+                <option value="">Select</option>
+                {[1, 2, 3, 4, 5].map(y => <option key={y} value={y}>{y}</option>)}
+            </select>
+        </div>
+        <div style={{...styles.formGroup, flex: 1}}>
+            <label style={styles.label}>Passing Out Year</label>
+            <input type="number" name="passing_year" placeholder="YYYY" required style={styles.input} />
+        </div>
+    </div>
+
+    {/* Creative Domain ഇവിടെ ആവശ്യമില്ല, അത് ഒഴിവാക്കി */}
+
+    <button type="submit" disabled={loading} style={styles.button}>
+        {loading ? "LOGGING IN..." : "ENTER CREATIVE WALL"}
+    </button>
+</form>
+
+// ... ബാക്കി കോഡുകൾ ...
 const styles = {
   bodyReplacement: {
     backgroundImage: 'radial-gradient(circle at 50% 50%, #1a0505 0%, #050505 100%)',
