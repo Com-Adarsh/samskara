@@ -1,9 +1,13 @@
-// components/PhotoGallery.js
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 export default function PhotoGallery({ photos }) {
   const [selectedImg, setSelectedImg] = useState(null);
+
+  // Safety check: if photos are still loading or empty
+  if (!photos || photos.length === 0) {
+    return <div style={{ color: '#fff', textAlign: 'center', padding: '50px' }}>Loading the Darkroom...</div>;
+  }
 
   return (
     <div style={styles.galleryWrapper}>
@@ -82,7 +86,7 @@ const styles = {
     position: 'relative', 
     cursor: 'pointer', 
     overflow: 'hidden', 
-    borderRadius: '2px', // Sharper edges for a modern look
+    borderRadius: '2px',
     backgroundColor: '#111'
   },
   image: { 
@@ -97,13 +101,9 @@ const styles = {
     padding: '20px',
     background: 'linear-gradient(transparent, rgba(0,0,0,0.9))',
     color: '#fff',
-    opacity: 0,
-    transition: '0.3s ease',
     display: 'flex',
     flexDirection: 'column',
   },
-  // We can add a CSS hover selector in a real .css file, 
-  // but for inline-styles, we use the motion.div whileHover helper.
   artistName: {
     fontFamily: "'Syncopate', sans-serif",
     fontSize: '0.7rem',
@@ -158,43 +158,4 @@ const styles = {
     fontSize: '0.6rem',
     letterSpacing: '2px'
   }
-};
-          <div style={styles.imgInfo}>
-            <h3>{selectedImg.title}</h3>
-            <p>By {selectedImg.artist}</p>
-          </div>
-        </div>
-      )}
-    </div>
-  );
-}
-
-const styles = {
-  galleryWrapper: { padding: '50px 5%', backgroundColor: '#000' },
-  heading: { color: '#FFD700', borderLeft: '5px solid #FF0000', paddingLeft: '15px', marginBottom: '30px' },
-  masonryGrid: {
-    display: 'grid',
-    gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))',
-    gridGap: '20px',
-  },
-  photoCard: { position: 'relative', cursor: 'pointer', overflow: 'hidden', borderRadius: '4px' },
-  image: { width: '100%', display: 'block', transition: '0.3s' },
-  overlay: {
-    position: 'absolute',
-    bottom: 0,
-    width: '100%',
-    padding: '10px',
-    background: 'linear-gradient(transparent, rgba(0,0,0,0.8))',
-    color: '#fff',
-    fontSize: '0.8rem'
-  },
-  lightbox: {
-    position: 'fixed',
-    top: 0, left: 0, width: '100%', height: '100%',
-    backgroundColor: 'rgba(0,0,0,0.95)',
-    display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center',
-    zIndex: 10000
-  },
-  fullImg: { maxHeight: '80%', maxWidth: '90%', border: '2px solid #FFD700' },
-  imgInfo: { color: '#fff', textAlign: 'center', marginTop: '20px' }
 };
