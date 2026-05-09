@@ -132,6 +132,9 @@ export default function DetailsForm({ onNext }) {
                         <option value="Painting">Painting</option>
                         <option value="Music">Music</option>
                         <option value="Dance">Dance</option>
+                        <option value="Theatre">Theatre</option>
+                        <option value="Fashion">Fashion</option>
+                        <option value="Designing">Designing</option>
                     </select>
                 </div>
             </div>
