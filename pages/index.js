@@ -25,6 +25,7 @@ export default function Home() {
   const scriptURL = 'https://script.google.com/macros/s/AKfycbxzj7vxNbt3Kn6ET1Q_ik_8dS7skjBI_I2iK03W_nvO5_VGxhQDVdEa-tm6G4OSxy2D/exec'; 
   const imgbbAPIKey = '6150992b01e2acc330921c2be02bf83a'; 
 
+  // ഗാലറി ഡാറ്റ ലോഡ് ചെയ്യാൻ
   const loadData = async () => {
     try {
       const data = await fetchArtisticSubmissions();
@@ -40,12 +41,14 @@ export default function Home() {
     loadData();
   }, []);
 
+  // ഫിൽട്ടറിംഗ് ലോജിക്
   const filteredData = submissions.filter(item => 
     activeTab === 'All' ? true : item.type === activeTab
   );
 
   const featuredPainting = submissions.find(item => item.type === 'Painting');
 
+  // ImgBB വഴിയുള്ള അപ്‌ലോഡ് ലോജിക്
   const handleUpload = async (e) => {
     e.preventDefault();
     setUploading(true);
@@ -54,7 +57,7 @@ export default function Home() {
     let imageUrl = "";
 
     try {
-      // 1. Upload to ImgBB
+      // 1. ImgBB-ലേക്ക് ചിത്രം അപ്‌ലോഡ് ചെയ്യുന്നു
       if (fileInput) {
         const imgData = new FormData();
         imgData.append('image', fileInput);
@@ -66,7 +69,7 @@ export default function Home() {
         imageUrl = imgJson.data.url;
       }
 
-      // 2. Submit to Google Sheets
+      // 2. ഗൂഗിൾ ഷീറ്റിലേക്ക് വിവരങ്ങൾ അയക്കുന്നു
       const formData = new FormData();
       formData.set('formType', 'creative');
       formData.set('Name', localStorage.getItem('userName') || "Guest");
@@ -95,14 +98,30 @@ export default function Home() {
       </Head>
 
       <AnimatePresence mode="wait">
-        {/* PHASE 1: SPLASH */}
+        {/* PHASE 1: SPLASH - രജിസ്ട്രേഷൻ പരിശോധന ഇവിടെ നടക്കുന്നു */}
         {step === 'splash' && (
-          <IntroSplash key="splash" onComplete={() => setStep('details')} />
+          <IntroSplash 
+            key="splash" 
+            onComplete={() => {
+              const isRegistered = localStorage.getItem('isRegistered');
+              if (isRegistered === 'true') {
+                setStep('gallery'); // രജിസ്റ്റർ ചെയ്തവർക്ക് നേരിട്ട് ഗാലറി
+              } else {
+                setStep('details'); // അല്ലാത്തവർക്ക് രജിസ്ട്രേഷൻ ഫോം
+              }
+            }} 
+          />
         )}
 
-        {/* PHASE 2: DETAILS */}
+        {/* PHASE 2: DETAILS - ആദ്യ തവണ മാത്രം കാണിക്കുന്നത് */}
         {step === 'details' && (
-          <DetailsForm key="details" onNext={() => setStep('gallery')} />
+          <DetailsForm 
+            key="details" 
+            onNext={() => {
+              localStorage.setItem('isRegistered', 'true');
+              setStep('gallery');
+            }} 
+          />
         )}
 
         {/* PHASE 3: GALLERY HUB */}
@@ -133,7 +152,7 @@ export default function Home() {
               <PhotoGallery photos={filteredData} />
             </section>
 
-            {/* NEW: Upload Portal directly in Gallery */}
+            {/* Upload Portal - ഗാലറിയുടെ താഴെ */}
             <section style={styles.uploadSection}>
               <h2 style={styles.subTitle}>സൃഷ്ടികൾ പങ്കുവെക്കൂ</h2>
               <form onSubmit={handleUpload} style={styles.form}>
