@@ -5,7 +5,7 @@ export default function DetailsForm({ onNext }) {
   const [loading, setLoading] = useState(false);
 
   // ഗൂഗിൾ ആപ്പ് സ്ക്രിപ്റ്റ് URL
-  const scriptURL = 'https://script.google.com/macros/s/AKfycbxzj7vxNbt3Kn6ET1Q_ik_8dS7skjBI_I2iK03W_nvO5_VGxhQDVdEa-tm6G4OSxy2D/exec';
+  const scriptURL = 'https://script.google.com/macros/s/AKfycbzp1_1CCwrJ6PApKnYtQ0I21B8NOv1oAAaYYBkcGp8hMI8SFWQfYSGPPVvCSa3vVeUM/exec';
 
   const handleSubmit = async (e) => {
     e.preventDefault();
