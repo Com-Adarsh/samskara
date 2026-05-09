@@ -134,3 +134,11 @@ const styles = {
     margin: '0 auto 20px auto'
   }
 };
+
+return (
+  <div className="main-container">
+    {/* ... your existing splash/form/gallery code ... */}
+    
+    <Footer /> 
+  </div>
+);
