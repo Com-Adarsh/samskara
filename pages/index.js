@@ -3,18 +3,26 @@ import Head from 'next/head';
 import { motion, AnimatePresence } from 'framer-motion';
 import { fetchArtisticSubmissions } from '../utils/GoogleSheetLib';
 
-// Components
+// Core Components
 import IntroSplash from '../components/IntroSplash';
+import PhotoGallery from '../components/PhotoGallery';
+import ProcessSlider from '../components/ProcessSlider';
+import InstagramFeed from '../components/InstagramFeed';
+import FilterBar from '../components/FilterBar';
+
+// Form & Interaction Components
 import DetailsForm from '../components/DetailsForm';
-import CreativeWall from '../components/CreativeWall'; 
+import StoryEntry from '../components/StoryEntry'; // ഈ ഫയൽ components ഫോൾഡറിൽ ഉണ്ടെന്ന് ഉറപ്പാക്കുക
 import Footer from '../components/Footer';
 
 export default function Home() {
+  // Logic Flow: 'splash' -> 'details' -> 'story' -> 'gallery'
   const [step, setStep] = useState('splash');
+  const [activeTab, setActiveTab] = useState('All');
   const [submissions, setSubmissions] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  // ഗാലറിയിലേക്ക് വേണ്ട ഡാറ്റ ലോഡ് ചെയ്യുന്നു
+  // ഡാറ്റ ലോഡിംഗ്
   const loadData = async () => {
     try {
       const data = await fetchArtisticSubmissions();
@@ -28,7 +36,16 @@ export default function Home() {
 
   useEffect(() => {
     loadData();
+    // നേരത്തെ രജിസ്റ്റർ ചെയ്തവർക്ക് നേരിട്ട് ഗാലറി കാണിക്കണമെന്നുണ്ടെങ്കിൽ ഇത് ഉപയോഗിക്കാം
+    // const registered = localStorage.getItem('isRegistered');
+    // if (registered === 'true') setStep('gallery');
   }, []);
+
+  const filteredData = submissions.filter(item => 
+    activeTab === 'All' ? true : item.type === activeTab
+  );
+
+  const featuredPainting = submissions.find(item => item.type === 'Painting');
 
   return (
     <div style={{ backgroundColor: '#000', color: '#fff', minHeight: '100vh', overflowX: 'hidden' }}>
@@ -39,47 +56,49 @@ export default function Home() {
       </Head>
 
       <AnimatePresence mode="wait">
-        {/* 1. ആനിമേഷൻ സ്പ്ലാഷ് സ്ക്രീൻ */}
+        {/* ഘട്ടം 1: ആനിമേഷൻ സ്പ്ലാഷ് */}
         {step === 'splash' && (
-          <IntroSplash 
-            key="splash" 
-            onComplete={() => {
-              const isRegistered = localStorage.getItem('isRegistered');
-              setStep(isRegistered === 'true' ? 'gallery' : 'details');
-            }} 
-          />
+          <IntroSplash key="splash" onComplete={() => setStep('details')} />
         )}
 
-        {/* 2. രജിസ്ട്രേഷൻ ഫോം (രജിസ്റ്റർ ചെയ്യാത്തവർക്ക് മാത്രം) */}
+        {/* ഘട്ടം 2: യൂസർ വിവരങ്ങൾ */}
         {step === 'details' && (
-          <DetailsForm 
-            key="details" 
-            onNext={() => {
-              localStorage.setItem('isRegistered', 'true');
-              setStep('gallery');
-            }} 
-          />
+          <DetailsForm key="details" onNext={() => setStep('story')} />
         )}
 
-        {/* 3. പ്രധാന ഗാലറി കംപോണന്റ് (CreativeWall) */}
+        {/* ഘട്ടം 3: കഥ എഴുതാനുള്ള ഭാഗം */}
+        {step === 'story' && (
+          <StoryEntry key="story" onFinish={() => setStep('gallery')} />
+        )}
+
+        {/* ഘട്ടം 4: പ്രധാന ഗാലറി */}
         {step === 'gallery' && (
           <motion.div 
             key="gallery"
             initial={{ opacity: 0 }} 
             animate={{ opacity: 1 }} 
+            exit={{ opacity: 0 }}
             transition={{ duration: 1 }}
             style={{ fontFamily: "'Inter', sans-serif" }}
           >
-            {/* 
-              ഗാലറി, ഫിൽട്ടർ, അപ്‌ലോഡ് ഫോം എന്നിവയെല്ലാം CreativeWall-ലേക്ക് മാറ്റി.
-              ഇവിടെ refreshData പ്രോപ്പ് നൽകുന്നത് അപ്‌ലോഡ് കഴിഞ്ഞാലുടൻ ലിസ്റ്റ് പുതുക്കാൻ സഹായിക്കും.
-            */}
-            <CreativeWall 
-              submissions={submissions} 
-              refreshData={loadData} 
-              loading={loading}
-            />
-            
+            <FilterBar activeTab={activeTab} setActiveTab={setActiveTab} />
+
+            {(activeTab === 'All' || activeTab === 'Painting') && featuredPainting && (
+              <section style={styles.section}>
+                <h2 style={styles.sectionTitle}>Featured Process</h2>
+                <ProcessSlider 
+                  sketch={featuredPainting.sketchUrl} 
+                  final={featuredPainting.url} 
+                  artistName={featuredPainting.artist} 
+                />
+              </section>
+            )}
+
+            <section style={styles.section}>
+              <PhotoGallery photos={filteredData} />
+            </section>
+
+            <InstagramFeed />
             <Footer />
           </motion.div>
         )}
@@ -87,3 +106,17 @@ export default function Home() {
     </div>
   );
 }
+
+const styles = {
+  section: { padding: '40px 0' },
+  sectionTitle: {
+    fontFamily: "'Syncopate', sans-serif",
+    textAlign: 'center',
+    color: 'transparent',
+    WebkitTextStroke: '1px #FFD700',
+    fontSize: '2rem',
+    textTransform: 'uppercase',
+    letterSpacing: '4px',
+    marginBottom: '30px'
+  }
+};
