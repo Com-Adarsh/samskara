@@ -218,3 +218,45 @@ const styles = {
     boxShadow: '0 10px 20px rgba(239, 68, 68, 0.2)'
   }
 };
+// നിങ്ങളുടെ കോഡിലെ ഈ ഭാഗം ഇങ്ങനെ മാറ്റുക
+instaBtn: { 
+  color: '#888', // അല്പം കൂടി തെളിഞ്ഞ നിറം
+  textDecoration: 'none', 
+  fontSize: '0.7rem', 
+  letterSpacing: '2px', 
+  border: '1px solid rgba(255,255,255,0.1)', // ബോർഡർ വളരെ നേർത്തതാക്കി
+  padding: '10px 20px', 
+  borderRadius: '30px',
+  transition: '0.3s'
+}
+
+import { useState, useEffect } from 'react';
+import DetailsForm from '../components/DetailsForm';
+import CreativeWall from '../components/CreativeWall'; // നിങ്ങളുടെ പുതിയ ഫയൽ
+
+export default function Home() {
+  const [step, setStep] = useState('loading');
+
+  useEffect(() => {
+    // രജിസ്റ്റർ ചെയ്തിട്ടുണ്ടോ എന്ന് പരിശോധിക്കുന്നു
+    const registered = localStorage.getItem('isRegistered');
+    setStep(registered === 'true' ? 'wall' : 'details');
+  }, []);
+
+  if (step === 'loading') return null;
+
+  return (
+    <main style={{ backgroundColor: '#050505', minHeight: '100vh' }}>
+      {/* രജിസ്റ്റർ ചെയ്യാത്തവർക്ക് മാത്രം ഇത് കാണിക്കും */}
+      {step === 'details' && (
+        <DetailsForm onNext={() => {
+          localStorage.setItem('isRegistered', 'true');
+          setStep('wall');
+        }} />
+      )}
+      
+      {/* രജിസ്റ്റർ ചെയ്തവർക്ക് മാത്രം ഗാലറിയും അപ്‌ലോഡും കാണിക്കും */}
+      {step === 'wall' && <CreativeWall />}
+    </main>
+  );
+}
