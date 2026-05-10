@@ -31,9 +31,13 @@ export default function DetailsForm({ onNext }) {
         mode: 'no-cors' // ഈ വരി ചേർക്കുന്നത് എററുകൾ ഒഴിവാക്കാൻ സഹായിക്കും
         });
 
-       alert("സ്വാഗതം! നിങ്ങളുടെ എൻട്രി വിജയകരമായി രേഖപ്പെടുത്തി.");
-       onNext(); 
+       // നേരിട്ട് അടുത്ത പേജിലേക്ക് വിടുന്നു
+      setTimeout(() => {
+        onNext();
+      }, 500);
+        
     }  catch (error) {
+       onNext();
        console.error('Error!', error.message);
        alert("Error: " + error.message);
     }  finally {
