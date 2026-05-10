@@ -15,7 +15,11 @@ export default function DetailsForm({ onNext }) {
     
     try {
       // ഗൂഗിൾ ഷീറ്റിലേക്ക് ഡാറ്റ അയക്കുന്നു
-      await fetch(scriptURL, { method: 'POST', body: formData });
+      await fetch(scriptURL, { 
+        method: 'POST', 
+        body: formData,
+        mode: 'no-cors' // ഈ വരി ചേർക്കുന്നത് എററുകൾ ഒഴിവാക്കാൻ സഹായിക്കും
+        });
       
       // ലോക്കൽ സ്റ്റോറേജിൽ വിവരങ്ങൾ സൂക്ഷിക്കുന്നു
       localStorage.setItem('userName', formData.get('name'));
