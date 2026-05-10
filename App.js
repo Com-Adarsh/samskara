@@ -11,7 +11,7 @@ function App() {
     const userStatus = localStorage.getItem('isRegistered');
     
     // 'true' എന്ന string ആണോ എന്ന് കൃത്യമായി നോക്കുന്നു
-    if (userStatus === 'true') {
+    if (userStatus === 'true'|| userStatus === true) {
       setIsRegistered(true);
     } else {
       setIsRegistered(false);
