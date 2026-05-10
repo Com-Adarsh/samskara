@@ -1,24 +1,33 @@
 import { useState, useEffect } from 'react';
-// നിങ്ങളുടെ മറ്റ് ഇംപോർട്ടുകൾ...
+import DetailsForm from './components/DetailsForm';
+import CreativeWall from './components/CreativeWall'; // നിങ്ങളുടെ ഗാലറി പേജിന്റെ പേര് നൽകുക
 
 function App() {
   const [isRegistered, setIsRegistered] = useState(false);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // ആപ്പ് തുറക്കുമ്പോൾ ലോക്കൽ സ്റ്റോറേജ് പരിശോധിക്കുന്നു
-    const status = localStorage.getItem('isRegistered');
-    if (status === 'true') {
+    // ബ്രൗസറിൽ നേരത്തെ രജിസ്റ്റർ ചെയ്ത വിവരം ഉണ്ടോ എന്ന് നോക്കുന്നു
+    const userStatus = localStorage.getItem('isRegistered');
+    if (userStatus === 'true') {
       setIsRegistered(true);
     }
+    setLoading(false);
   }, []);
 
+  if (loading) return null; // ഡാറ്റ ലോഡ് ചെയ്യുന്നത് വരെ ഒന്നും കാണിക്കില്ല
+
   return (
-    <div>
+    <div className="App">
       {!isRegistered ? (
+        // രജിസ്റ്റർ ചെയ്തിട്ടില്ലെങ്കിൽ ഫോം കാണിക്കുക
         <DetailsForm onNext={() => setIsRegistered(true)} />
       ) : (
-        <Gallery /> // അല്ലെങ്കിൽ നിങ്ങളുടെ മെയിൻ കണ്ടന്റ്
+        // രജിസ്റ്റർ ചെയ്തവർക്ക് നേരിട്ട് മെയിൻ പേജ് കാണിക്കുക
+        <CreativeWall />
       )}
     </div>
   );
 }
+
+export default App;
