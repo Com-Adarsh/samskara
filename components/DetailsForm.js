@@ -57,12 +57,22 @@ export default function DetailsForm({ onNext }) {
 
           <div style={styles.inputGroup}>
             <label style={styles.label}>WhatsApp Number</label>
-            <input type="tel" name="phone" pattern="[0-9]{10}" required style={styles.input} placeholder="10 അക്ക നമ്പർ" />
+            <input type="tel" name="phone" pattern="[0-9]{10}" required style={styles.input} placeholder="10 Digit Number" />
           </div>
 
           <div style={styles.inputGroup}>
             <label style={styles.label}>Department</label>
-            <input name="dept" required style={styles.input} placeholder="ഡിപ്പാർട്ട്മെന്റ് നൽകുക" />
+            <input name="dept" required style={styles.input} placeholder="Enter Department" />
+          </div>
+
+         <div style={styles.inputGroup}>
+            <label style={styles.label}>Interest</label>
+            <input name="interest" required style={styles.input} placeholder="Enter Interest" />
+          </div>
+
+       <div style={styles.inputGroup}>
+            <label style={styles.label}>Pass Out Year</label>
+            <input name="pass year" required style={styles.input} placeholder="Enter Year of Passing" />
           </div>
 
           <div style={styles.row}>
