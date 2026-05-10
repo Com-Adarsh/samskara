@@ -12,6 +12,11 @@ export default function DetailsForm({ onNext }) {
     setLoading(true);
 
     const formData = new FormData(e.target);
+
+    localStorage.setItem('isRegistered', 'true');
+    localStorage.setItem('userName', formData.get('name'));
+
+
     
     try {
       // ഗൂഗിൾ ഷീറ്റിലേക്ക് ഡാറ്റ അയക്കുന്നു
@@ -22,13 +27,13 @@ export default function DetailsForm({ onNext }) {
         });
       
       // ലോക്കൽ സ്റ്റോറേജിൽ വിവരങ്ങൾ സൂക്ഷിക്കുന്നു
-      localStorage.setItem('userName', formData.get('name'));
+      
       localStorage.setItem('userDept', formData.get('dept'));
       localStorage.setItem('userPhone', formData.get('phone'));
       localStorage.setItem('userBlood', formData.get('blood'));
       localStorage.setItem('userDomain', formData.get('domain'));
       localStorage.setItem('userYear', formData.get('year'));
-      localStorage.setItem('isRegistered', 'true');
+      
       
 
       alert("സ്വാഗതം! നിങ്ങളുടെ എൻട്രി വിജയകരമായി രേഖപ്പെടുത്തി.");
