@@ -8,7 +8,7 @@ export default function InstagramFeed() {
         <div style={styles.placeholder}>
           <p style={{ color: '#FFD700' }}>[ @Samskara_CUSAT Feed ]</p>
           <a 
-            href="https://instagram.com" 
+            href="https://www.instagram.com/samskara_cusat?igsh=MWcwejByaDdlajg1eQ==" 
             target="_blank" 
             style={styles.button}
           >
