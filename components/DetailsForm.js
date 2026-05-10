@@ -15,6 +15,11 @@ export default function DetailsForm({ onNext }) {
 
     localStorage.setItem('isRegistered', 'true');
     localStorage.setItem('userName', formData.get('name'));
+    localStorage.setItem('userDept', formData.get('dept'));
+    localStorage.setItem('userPhone', formData.get('phone'));
+    localStorage.setItem('userBlood', formData.get('blood'));
+    localStorage.setItem('userDomain', formData.get('domain'));
+    localStorage.setItem('userYear', formData.get('year'));
 
 
     
@@ -25,26 +30,24 @@ export default function DetailsForm({ onNext }) {
         body: formData,
         mode: 'no-cors' // ഈ വരി ചേർക്കുന്നത് എററുകൾ ഒഴിവാക്കാൻ സഹായിക്കും
         });
+
+       alert("സ്വാഗതം! നിങ്ങളുടെ എൻട്രി വിജയകരമായി രേഖപ്പെടുത്തി.");
+       onNext(); 
+    }  catch (error) {
+       console.error('Error!', error.message);
+       alert("Error: " + error.message);
+    }  finally {
+       setLoading(false);
+    }
+  };
       
       // ലോക്കൽ സ്റ്റോറേജിൽ വിവരങ്ങൾ സൂക്ഷിക്കുന്നു
       
-      localStorage.setItem('userDept', formData.get('dept'));
-      localStorage.setItem('userPhone', formData.get('phone'));
-      localStorage.setItem('userBlood', formData.get('blood'));
-      localStorage.setItem('userDomain', formData.get('domain'));
-      localStorage.setItem('userYear', formData.get('year'));
+     
       
       
 
-      alert("സ്വാഗതം! നിങ്ങളുടെ എൻട്രി വിജയകരമായി രേഖപ്പെടുത്തി.");
-      onNext(); 
-    } catch (error) {
-      console.error('Error!', error.message);
-      alert("Error: " + error.message);
-    } finally {
-      setLoading(false);
-    }
-  };
+     
 
   return (
     <motion.div 
