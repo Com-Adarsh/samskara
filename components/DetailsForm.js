@@ -72,7 +72,7 @@ export default function DetailsForm({ onNext }) {
 
        <div style={styles.inputGroup}>
             <label style={styles.label}>Pass Out Year</label>
-            <input name="pass year" required style={styles.input} placeholder="Enter Year of Passing" />
+            <input name="passing_year" required style={styles.input} placeholder="Enter Year of Passing" />
           </div>
 
           <div style={styles.row}>
