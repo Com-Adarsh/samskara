@@ -1,31 +1,25 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import DetailsForm from './components/DetailsForm';
-import CreativeWall from './components/CreativeWall'; // നിങ്ങളുടെ ഗാലറി/മെയിൻ പേജിന്റെ പേര് ഇവിടെ നൽകുക
+import CreativeWall from './components/CreativeWall';
 
 function App() {
-  const [isRegistered, setIsRegistered] = useState(false);
-  const [checking, setChecking] = useState(true);
-
-  useEffect(() => {
-    // ആപ്പ് ലോഡ് ചെയ്യുമ്പോൾ ലോക്കൽ സ്റ്റോറേജ് ചെക്ക് ചെയ്യുന്നു
+  // ആപ്പ് ലോഡ് ചെയ്യുമ്പോൾ തന്നെ ലോക്കൽ സ്റ്റോറേജ് ചെക്ക് ചെയ്യുന്നു
+  const [isRegistered, setIsRegistered] = useState(() => {
     const status = localStorage.getItem('isRegistered');
-    if (status === 'true') {
-      setIsRegistered(true);
-    }
-    setChecking(false);
-  }, []);
+    return status === 'true';
+  });
 
-  // ഡാറ്റ ചെക്ക് ചെയ്യുന്ന സമയം വരെ ഒരു ചെറിയ ലോഡിംഗ് കാണിക്കാം
-  if (checking) return null; 
+  // ഈ ഫങ്ക്ഷൻ DetailsForm-ലേക്ക് പാസ് ചെയ്യുന്നു
+  const handleRegistrationSuccess = () => {
+    setIsRegistered(true);
+  };
 
   return (
-    <div className="App">
-      {!isRegistered ? (
-        // രജിസ്റ്റർ ചെയ്തിട്ടില്ലെങ്കിൽ മാത്രം ഫോം കാണിക്കും
-        <DetailsForm onNext={() => setIsRegistered(true)} />
+    <div className="App" style={{ backgroundColor: '#050505', minHeight: '100vh' }}>
+      {isRegistered ? (
+        <CreativeWall />
       ) : (
-        // രജിസ്റ്റർ ചെയ്തവർക്ക് നേരിട്ട് മെയിൻ കണ്ടന്റ്
-        <CreativeWall /> 
+        <DetailsForm onNext={handleRegistrationSuccess} />
       )}
     </div>
   );
