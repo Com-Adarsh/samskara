@@ -2,6 +2,11 @@ import { useState } from 'react';
 import DetailsForm from './components/DetailsForm';
 import CreativeWall from './components/CreativeWall';
 
+
+// App.js
+const [isRegistered, setIsRegistered] = useState(() => {
+  return localStorage.getItem('isRegistered') === 'true';
+});
 function App() {
   // ആപ്പ് ലോഡ് ചെയ്യുമ്പോൾ തന്നെ ലോക്കൽ സ്റ്റോറേജ് ചെക്ക് ചെയ്യുന്നു
   const [isRegistered, setIsRegistered] = useState(() => {
