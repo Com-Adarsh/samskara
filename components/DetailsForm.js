@@ -36,14 +36,12 @@ export default function DetailsForm({ onNext }) {
         onNext();
       }, 500);
         
-    }  catch (error) {
-       onNext();
-       console.error('Error!', error.message);
-       alert("Error: " + error.message);
-    }  finally {
-       setLoading(false);
-    }
-  };
+    // 3. ഉടൻ തന്നെ അടുത്ത പേജിലേക്ക് വിടുന്നു
+    window.location.reload(); // ഇത് പേജ് റിഫ്രഷ് ചെയ്ത് ഗാലറി കാണിക്കും
+  } catch (error) {
+    window.location.reload();
+  }
+};
       
       // ലോക്കൽ സ്റ്റോറേജിൽ വിവരങ്ങൾ സൂക്ഷിക്കുന്നു
       
