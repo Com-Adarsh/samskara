@@ -25,6 +25,7 @@ export default function DetailsForm({ onNext }) {
       localStorage.setItem('userDomain', formData.get('domain'));
       localStorage.setItem('userYear', formData.get('year'));
       localStorage.setItem('isRegistered', 'true');
+      
 
       alert("സ്വാഗതം! നിങ്ങളുടെ എൻട്രി വിജയകരമായി രേഖപ്പെടുത്തി.");
       onNext(); 
