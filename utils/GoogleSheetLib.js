@@ -1,7 +1,7 @@
 // utils/GoogleSheetLib.js
 
 // Replace with your published Google Sheet JSON endpoint or a simple CSV-to-JSON logic
-const SHEET_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRP9x0ODVtMRWDM0At0GmZuTKdMRIAUR6Mw4QpI2bXm1IkaK7_gwvkLmA-o2qgNCea0nEW8eZNG_De3/pub?output=csv";
+const SHEET_URL = "https://script.google.com/macros/s/AKfycbx6KqHG0ig6O-Z8X1HoDPxE7_rxlaYltxUiEtFvloNE76bmHI184PhNs5-xKeN2WgZz/exec";
 
 export async function fetchArtisticSubmissions() {
   try {
