@@ -88,6 +88,10 @@ export default function DetailsForm({ onNext, onLogin }) {
                 <option value="A+">A+</option>
                 <option value="B+">B+</option>
                 <option value="AB+">AB+</option>
+                <option value="O-">O-</option>
+                <option value="A-">A-</option>
+                <option value="B-">B-</option>
+                <option value="AB-">AB-</option>
                 {/* ബാക്കി ഗ്രൂപ്പുകളും ചേർക്കാം */}
               </select>
             </div>
