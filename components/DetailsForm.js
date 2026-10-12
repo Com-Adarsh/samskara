@@ -1,41 +1,36 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
 
-export default function DetailsForm({ onNext }) {
+export default function DetailsForm({ onNext, onLogin }) {
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
 
   const scriptURL = 'https://script.google.com/macros/s/AKfycbz1-qpuklkJwq9yZDuxBVcksOaa6yFNfB8YM4kFTNXTpTCAUP5Pg2W6cxdc7r0r3obu/exec';
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
+    setError('');
 
     const form = e.target;
     const formData = new FormData(form);
 
     try {
-      // 1. ഗൂഗിൾ ഷീറ്റിലേക്ക് ഡാറ്റ അയക്കുന്നു (no-cors mode ഉപയോഗിക്കുന്നു)
-      fetch(scriptURL, { 
+      await fetch(scriptURL, {
         method: 'POST', 
         body: formData,
         mode: 'no-cors' 
       });
 
-      // 2. ലോഗിൻ വിവരങ്ങൾ ബ്രൗസറിൽ ഉറപ്പിക്കുന്നു
       localStorage.setItem('isRegistered', 'true');
       localStorage.setItem('userName', formData.get('name'));
       localStorage.setItem('userDept', formData.get('dept'));
-
-      // 3. അല്പം താമസിച്ച് (0.5 sec) പേജ് മാറ്റുന്നു (ഡാറ്റ സേവ് ആകാൻ സമയം നൽകുന്നു)
-      setTimeout(() => {
-        onNext(); 
-      }, 500);
+      localStorage.setItem('userPhone', formData.get('phone'));
+      onNext();
 
     } catch (error) {
       console.error('Submission failed', error);
-      // എറർ വന്നാലും യൂസർക്ക് ആപ്പിലേക്ക് കയറാൻ അനുവാദം നൽകുന്നു
-      localStorage.setItem('isRegistered', 'true');
-      onNext();
+      setError('Could not save your details. Please check your connection and try again.');
     } finally {
       setLoading(false);
     }
@@ -101,7 +96,11 @@ export default function DetailsForm({ onNext }) {
           <button type="submit" disabled={loading} style={styles.button}>
             {loading ? "സേവ് ചെയ്യുന്നു..." : "ENTER CREATIVE WALL"}
           </button>
+          {error && <p role="alert" style={styles.error}>{error}</p>}
         </form>
+        <button type="button" onClick={onLogin} style={styles.loginButton}>
+          Already registered? Sign in with your phone
+        </button>
       </div>
     </motion.div>
   );
@@ -116,5 +115,7 @@ const styles = {
   label: { display: 'block', fontSize: '10px', color: '#fbbf24', marginBottom: '5px', textTransform: 'uppercase' },
   input: { width: '100%', padding: '12px', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.2)', background: '#111', color: '#fff', boxSizing: 'border-box' },
   row: { display: 'flex', gap: '10px', marginBottom: '20px' },
-  button: { width: '100%', padding: '15px', borderRadius: '8px', border: 'none', background: 'linear-gradient(45deg, #ef4444, #991b1b)', color: '#fff', fontWeight: 'bold', cursor: 'pointer' }
+  button: { width: '100%', padding: '15px', borderRadius: '8px', border: 'none', background: 'linear-gradient(45deg, #ef4444, #991b1b)', color: '#fff', fontWeight: 'bold', cursor: 'pointer' },
+  loginButton: { display: 'block', margin: '18px auto 0', padding: '8px', border: 'none', background: 'none', color: '#fbbf24', cursor: 'pointer' },
+  error: { color: '#fca5a5', fontSize: '13px', marginTop: '12px' }
 };

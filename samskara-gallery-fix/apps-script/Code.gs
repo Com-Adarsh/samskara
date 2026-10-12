@@ -12,7 +12,15 @@ function doPost(e) {
     var params = (e && e.parameter) || {};
     var type = params.formType;
 
-    if (type === 'creative') {
+    if (type === 'login') {
+      var phone = String(params.phone || '').replace(/\D/g, '');
+      if (!/^\d{10}$/.test(phone)) {
+        return jsonOutput_({ result: 'error', error: 'Enter a valid 10-digit phone number.' });
+      }
+      var student = findStudentByPhone_(ss, phone);
+      if (!student) return jsonOutput_({ result: 'error', error: 'No registration found for that phone number.' });
+      return jsonOutput_({ result: 'success', user: student });
+    } else if (type === 'creative') {
       var sheet = getSubmissionsSheet_(ss);
       var headers = sheet.getRange(1, 1, 1, sheet.getLastColumn()).getDisplayValues()[0];
       var imageColumn = findHeader_(headers, ['imageurl', 'image', 'photourl']);
@@ -39,7 +47,7 @@ function doPost(e) {
       submission[6] = 'pending';
       submission[imageColumn] = imageUrl;
       sheet.appendRow(submission);
-    } else {
+    } else if (type === 'registration') {
       var registrationSheet = ss.getSheetByName(REG_SHEET);
       if (!registrationSheet) {
         return jsonOutput_({ result: 'error', error: 'Registration sheet not found' });
@@ -55,6 +63,8 @@ function doPost(e) {
         params.interest,
         'Active'
       ]);
+    } else {
+      return jsonOutput_({ result: 'error', error: 'Unknown form type.' });
     }
 
     return jsonOutput_({ result: 'success' });
@@ -65,16 +75,18 @@ function doPost(e) {
   }
 }
 
-function checkUser(identifier) {
-  var ss = SpreadsheetApp.getActiveSpreadsheet();
-  var sheet = ss.getSheetByName(REG_SHEET);
-  if (!sheet) return false;
+function findStudentByPhone_(spreadsheet, phone) {
+  var sheet = spreadsheet.getSheetByName(REG_SHEET);
+  if (!sheet || sheet.getLastRow() < 2) return null;
 
-  var data = sheet.getDataRange().getValues();
+  var data = sheet.getDataRange().getDisplayValues();
   for (var i = 1; i < data.length; i++) {
-    if (String(data[i][2]) === String(identifier)) return true;
+    var registeredPhone = String(data[i][2] || '').replace(/\D/g, '');
+    if (registeredPhone === phone) {
+      return { name: data[i][1] || '', dept: data[i][3] || '' };
+    }
   }
-  return false;
+  return null;
 }
 
 function doGet() {

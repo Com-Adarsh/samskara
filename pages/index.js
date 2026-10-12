@@ -12,12 +12,13 @@ import FilterBar from '../components/FilterBar';
 
 // Form & Interaction Components
 import DetailsForm from '../components/DetailsForm';
+import LoginForm from '../components/LoginForm';
 import StoryEntry from '../components/StoryEntry'; // ഈ ഫയൽ components ഫോൾഡറിൽ ഉണ്ടെന്ന് ഉറപ്പാക്കുക
 import Footer from '../components/Footer';
 
 export default function Home() {
   // Logic Flow: 'splash' -> 'details' -> 'story' -> 'gallery'
-  const [step, setStep] = useState('splash');
+  const [step, setStep] = useState('checking');
   const [activeTab, setActiveTab] = useState('All');
   const [submissions, setSubmissions] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -36,10 +37,16 @@ export default function Home() {
 
   useEffect(() => {
     loadData();
-    // നേരത്തെ രജിസ്റ്റർ ചെയ്തവർക്ക് നേരിട്ട് ഗാലറി കാണിക്കണമെന്നുണ്ടെങ്കിൽ ഇത് ഉപയോഗിക്കാം
-    // const registered = localStorage.getItem('isRegistered');
-    // if (registered === 'true') setStep('gallery');
+    setStep(localStorage.getItem('isRegistered') === 'true' ? 'gallery' : 'splash');
   }, []);
+
+  const handleChangeStudent = () => {
+    localStorage.removeItem('isRegistered');
+    localStorage.removeItem('userName');
+    localStorage.removeItem('userDept');
+    localStorage.removeItem('userPhone');
+    setStep('details');
+  };
 
   const filteredData = submissions.filter(item => 
     activeTab === 'All' ? true : item.type === activeTab
@@ -56,6 +63,7 @@ export default function Home() {
       </Head>
 
       <AnimatePresence mode="wait">
+        {step === 'checking' && <div key="checking" style={{ minHeight: '100vh', background: '#000' }} />}
         {/* ഘട്ടം 1: ആനിമേഷൻ സ്പ്ലാഷ് */}
         {step === 'splash' && (
           <IntroSplash key="splash" onComplete={() => setStep('details')} />
@@ -63,7 +71,11 @@ export default function Home() {
 
         {/* ഘട്ടം 2: യൂസർ വിവരങ്ങൾ */}
         {step === 'details' && (
-          <DetailsForm key="details" onNext={() => setStep('story')} />
+          <DetailsForm key="details" onNext={() => setStep('story')} onLogin={() => setStep('login')} />
+        )}
+
+        {step === 'login' && (
+          <LoginForm key="login" onBack={() => setStep('details')} onSuccess={() => setStep('gallery')} />
         )}
 
         {/* ഘട്ടം 3: കഥ എഴുതാനുള്ള ഭാഗം */}
@@ -81,7 +93,7 @@ export default function Home() {
             transition={{ duration: 1 }}
             style={{ fontFamily: "'Inter', sans-serif" }}
           >
-            <FilterBar activeTab={activeTab} setActiveTab={setActiveTab} />
+            <FilterBar activeTab={activeTab} setActiveTab={setActiveTab} onChangeStudent={handleChangeStudent} />
 
             {(activeTab === 'All' || activeTab === 'Painting') && featuredPainting && (
               <section style={styles.section}>

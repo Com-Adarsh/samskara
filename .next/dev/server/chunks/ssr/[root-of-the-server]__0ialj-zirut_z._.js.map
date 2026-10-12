@@ -1,0 +1,6 @@
+{
+  "version": 3,
+  "sources": [],
+  "sections": [
+    {"offset": {"line": 40, "column": 0}, "map": {"version":3,"sources":["file:///workspaces/samskara/pages/_document.js"],"sourcesContent":["// pages/_document.js\nimport { Html, Head, Main, NextScript } from 'next/document'\n\nexport default function Document() {\n  return (\n    <Html>\n      <Head>\n        <link href=\"https://fonts.googleapis.com/css2?family=Syncopate:wght@700&family=Inter:wght@400;700&display=swap\" rel=\"stylesheet\" />\n      </Head>\n      <body>\n        <Main />\n        <NextScript />\n      </body>\n    </Html>\n  )\n}\n"],"names":["Document","href","rel"],"mappings":";;;;;AAAA,qBAAqB;AACrB;;;AAEe,SAASA;IACtB,qBACE,qKAAC,iIAAI;;0BACH,qKAAC,iIAAI;0BACH,cAAA,qKAAC;oBAAKC,MAAK;oBAAqGC,KAAI;;;;;;;;;;;0BAEtH,qKAAC;;kCACC,qKAAC,iIAAI;;;;;kCACL,qKAAC,uIAAU;;;;;;;;;;;;;;;;;AAInB"}}]
+}
